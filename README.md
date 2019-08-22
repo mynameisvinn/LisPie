@@ -3,3 +3,10 @@ an updated and heavily commented version of [norvig's lispy](http://norvig.com/l
 
 ## usage
 to use, do `python lispy.py`.
+```python
+>>> (* (+ 2 3) 3)  # returns 15
+```
+
+## how does it work?
+### parsing
+parsing converts an expression into something that can be sequentially evaluated. for example, the nested expression `(* (+ 2 3) 3)` is converted into `['*', ['+', 2, 3], 3]` for evaluation.

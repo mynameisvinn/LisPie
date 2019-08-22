@@ -26,6 +26,7 @@ def tokenize(s):
 def read_from_tokens(tokens):
     """Read an expression from a sequence of tokens.
     """
+
     # scenario 1: nothing inputted
     if len(tokens) == 0:
         raise SyntaxError('unexpected EOF while reading')
@@ -40,6 +41,8 @@ def read_from_tokens(tokens):
         return L
     elif ')' == token:
         raise SyntaxError('unexpected )')
+    
+    # this case behaves as the base case
     else:
         return atom(token)
 
@@ -68,8 +71,15 @@ def standard_env():
     env.update(vars(math)) # sin, cos, sqrt, pi, ...
     
     env.update({
-        '+':op.add, '-':op.sub, '*':op.mul, '/':op.truediv, 
-        '>':op.gt, '<':op.lt, '>=':op.ge, '<=':op.le, '=':op.eq, 
+        '+': op.add, 
+        '-': op.sub, 
+        '*': op.mul, 
+        '/': op.truediv, 
+        '>': op.gt, 
+        '<': op.lt, 
+        '>=': op.ge, 
+        '<=': op.le, 
+        '=': op.eq, 
         'abs':     abs,
         'append':  op.add,
         'begin':   lambda *x: x[-1],
@@ -96,7 +106,8 @@ def standard_env():
 class Env(dict):
     """An environment: a dict of {'var':val} pairs, with an outer Env.
 
-    environment needs to track namespaces
+    environment needs to track namespaces, which assigns operations and symbol
+    names to their respective objects.
     """
     def __init__(self, parms=(), args=(), outer=None):
         self.update(zip(parms, args))  # update merger two python dicts together https://www.tutorialspoint.com/python/dictionary_update.htm
@@ -115,6 +126,7 @@ def repl():
     while True:
         input_data = input(">>>")
         parsed_data = parse(input_data)  # construct ast from code
+        print(parsed_data)
         val = eval(parsed_data)  # evaluate ast and return result
         if val is not None: 
             print(lispstr(val))
