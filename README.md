@@ -13,11 +13,11 @@ parsing converts an expression into something that can be sequentially evaluated
 
 lets look at an execution trace.
 
-in frame 0: `tokens` is `(* ( + 2 3 ) 3)`. we encounter `(`, so we create a new list `L0` in frame 0. `tokens` is `* ( + 2 3 ) 3)` because `(` was popped. we enter into the while loop `WL0`. we encounter `*` in `tokens[0]` so we call `read_from_tokens` on `tokens`, which creates frame 1. we will append the result of frame 1 and append it to list `L0`.
+in frame 0: `tokens` is `(* ( + 2 3 ) 3)`. we encounter `(`, so we create a new list `L0` in frame 0. `tokens` is `* ( + 2 3 ) 3)` because `(` was popped. we enter into the while loop `WL0`. since we do not encounter `(` in `tokens[0]`, we call `read_from_tokens` on `tokens`, which creates frame 1. we will append the result of frame 1 and append it to list `L0`.
 
-in frame 1: the 0th element `*` is popped from `tokens` and, since it is an atom, `*` is returned to frame 0. frame 1 is destroyed. 
+in frame 1: the 0th element `*` is popped from `tokens` and, since it is an atom, `*` is returned to frame 0. `tokens` is now `( + 2 3 ) 3)`. frame 1 is destroyed. 
 
-in frame 0: we receive `*` from frame 1 and append it to `L0`. `L0` is now `[*]`. since `*` was previously popped by frame 1, `tokens` is now `( + 2 3 ) 3)`. we are still in the while loop `WL0` because we havent the break condition of `tokens[0] != ')'`. we continue in this while loop `WL0` and call `read_from_tokens` on `tokens`, thus creating frame 1. 
+in frame 0: we receive `*` from frame 1 and append it to `L0`. `L0` is now `[*]`. as a reminder, `tokens` is `( + 2 3 ) 3)`. we are still in the while loop `WL0` because we havent satisfied the break condition of `tokens[0] != ')'`. we continue in `WL0` and call `read_from_tokens` on `tokens`, thus creating frame 1. the results of frame 1 will be appended to `L0`. 
 
 in frame 1: we pop `(` from `tokens`, such that `tokens` is now `+ 2 3 ) 3)`. since we encounter `(`, we create a second list `L1` in frame 1. since `tokens[0]` is not `)`, we enter into a second while loop `WL1`. inside `WL1`, we call `read_from_tokens` on `tokens`, thus creating frame 2. the result of frame 2 will be appended to list `L1`.
 
