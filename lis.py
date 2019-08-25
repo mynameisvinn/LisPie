@@ -242,7 +242,6 @@ def eval(x, env=global_env):
         """
         each list in lisp is formed by [operator arg1 arg2]. we know x[0] refers to the operator so that means x[1:] refers to arguments. we will extract arguments.
         """
-        print("rest", x[1:])
         args = [eval(exp, env) for exp in x[1:]]
 
         """
