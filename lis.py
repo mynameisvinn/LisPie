@@ -166,8 +166,8 @@ def repl():
     while True:
         input_data = input(">>>")
         parsed_data = parse(input_data)  # construct ast from code
-        print(parsed_data)
-        val = eval(parsed_data)  # evaluate ast and return result
+        print("parsed expression", parsed_data)  # usually this should be an ast
+        val = eval(parsed_data)  # evaluate expression
         if val is not None: 
             print(lispstr(val))
 
@@ -197,14 +197,14 @@ def eval(x, env=global_env):
 
     As well as the input to execute, interpret() receives an execution 
     context. This is the place where variables and their values are stored. 
-    When a piece of Lisp code is executed by interpret(), the execution context 
-    contains the variables that are accessible to that code.
-    """
+    When a piece of Lisp code is executed by interpret(), the execution context contains the variables that are accessible to that code.
+
+    x is the list created by the parser. for example, it might look like this: ['*', ['+', 2, 3], 3].
 
     """
-    if it's a symbol, find it's corresponding object/function
-    in the environment's dict.
-    """
+    print("what am i", x, type(x))
+    
+    # if it's a symbol aka string, find it's corresponding object/function the environment's dict.
     if isinstance(x, Symbol):      # variable reference
         return env.find(x)[x]
     
@@ -226,9 +226,28 @@ def eval(x, env=global_env):
     elif x[0] == 'lambda':         # (lambda (var...) body)
         (_, parms, body) = x
         return Procedure(parms, body, env)
-    else:                          # (proc arg...)
+    
+    # scenario: x is not a symbol and it is a list; x[0] is a operator
+    else:
+
+        """
+        this is an overloaded function name. do not confuse this with the standard eval() method. 
+
+        the 0th element in a list is always an operation. for example, the parser gives us this expression ['*', ['+', 2, 3], 3]. the 0th element is "*", which should be evaluated as an operation. we bind that operation to the variable name "proc".
+
+        the dict in eval(arg1, dict) limits what types of expressions can be evaluated by eval. https://www.programiz.com/python-programming/methods/built-in/eval
+        """
         proc = eval(x[0], env)
+
+        """
+        each list in lisp is formed by [operator arg1 arg2]. we know x[0] refers to the operator so that means x[1:] refers to arguments. we will extract arguments.
+        """
+        print("rest", x[1:])
         args = [eval(exp, env) for exp in x[1:]]
+
+        """
+        finally, we pass arguments to the operator, which is a function bound to the variable "proc"
+        """
         return proc(*args)
 
 if __name__ == "__main__":
