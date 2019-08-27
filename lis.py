@@ -184,10 +184,10 @@ def eval(x, env=global_env):
     """
     
     # if it's a symbol aka string, find it's corresponding function from env
-    if isinstance(x, Symbol):      # variable reference
+    if isinstance(x, Symbol):      # variable reference of strings (not numbers)
         return env.find(x)[x]
     
-    elif not isinstance(x, List):  # constant literal eg numbers
+    elif not isinstance(x, List):  # constant literal eg numbers (not strings)
         return x                
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
@@ -197,11 +197,11 @@ def eval(x, env=global_env):
         exp = (conseq if eval(test, env) else alt)
         return eval(exp, env)
     
-    # this expression ultimately binds the variable name var to a value. 
-    # this key value pair resides in the environment.
+    # update env's dict, where var: exp is the key:value pair
     elif x[0] == 'define':         # (define var exp)
-        (_, var, exp) = x  # unpack elements into var and expression
+        (_, var, exp) = x
         env[var] = eval(exp, env)
+        
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
         env.find(var)[var] = eval(exp, env)
