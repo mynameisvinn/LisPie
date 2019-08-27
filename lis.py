@@ -15,7 +15,12 @@ Number = (int, float) # A Lisp Number is implemented as a Python int or float
 ################ Parsing: parse, tokenize, and read_from_tokens
 
 def parse(program):
-    "Read a Scheme expression from a string."
+    """Read a Scheme expression from a string.
+
+    from norvig's site: Our function parse will take a string representation of 
+    a program as input, call tokenize to get a list of tokens, and then call 
+    read_from_tokens to assemble an abstract syntax tree.
+    """
     return read_from_tokens(tokenize(program))
 
 def tokenize(s):
@@ -26,39 +31,8 @@ def tokenize(s):
 def read_from_tokens(tokens):
     """Read an expression from a sequence of tokens.
 
-    for example, (* ( + 2 3 ) 3) is parsed to [*, [+, 2, 3], 3]
-
-    # lets look at the trace...
-
-    in frame 0: tokens is (* ( + 2 3 ) 3)
-    
-    in frame 0: we encounter "(", so we create a new list L0 in frame 0. tokens is [* ( + 2 3 ) 3)] because "(" has been popped.
-    
-    in frame 0: we enter into the while loop in frame 0 ("WL0"). we encounter * in tokens[0] and call read_from_tokens on tokens, which is "* ( + 2 3 ) 3)". this creates frame 1. whatever is returned by read_from_tokens will be appended to L0, which is currently empty.
-
-    in frame 1: the 0th element ["*"] is popped from tokens and, since it is an atom, it is returned to frame 0. frame 1 is destroyed. 
-
-    in frame 0: we receive "*" from frame 1 and append it to L0. L0 is now [*]. since "*" was previously popped by frame 1, tokens is now "( + 2 3 ) 3)". we are still in the while loop WL0. since tokens[0] is not ")", we continue in this while loop. we call read_from_tokens on tokens. frame 1 is created. 
-
-    in frame 1: we pop "(" from tokens, such that tokens is now "+ 2 3 ) 3)". since we encounter "(", we create a second list L1. we enter into a second while loop WL1. since tokens[0] is not ")", we enter into a second while loop WL1. inside WL1, we call read_from_tokens on tokens, thus creating frame 2. whatever is returned by frame 2 will be appended to this second list L1.
-
-    in frame 2: we pop "+" from tokens. tokens is now "2 3 ) 3)". since "+" is an atom, we return "+" to frame 1 and destroy frame 2.
-
-    in frame 1: we've received "+" from frame 2 and append it to L1. L1 is now [+]. as a reminder, tokens is "2 3 ) 3)". we are still in the while loop WL1 in frame 1 and, since we havent encountered ")" in tokens[0], we will continue to append to L1. we call read_from_tokens, which creates frame 2.
-
-    in frame 2: we pop "2" from tokens. tokens is now "3 ) 3)". since "2" is an atom, we return "2" to frame 1 and destroy frame 2. 
-
-    in frame 1: we've received "2" from frame 2 and append it to L1. L1 is now [+, 2]. as a reminder, tokens is "3 ) 3 )". we are still in the while loop WL1 in frame 1 and, since tokens[0] is not ")", we will call read_from_tokens, thus creating frame 2. we will take frame 2's result and append it to L1.
-
-    in frame 2: we pop "3" from tokens. tokens is now ") 3 )". since "3" is an atom, we return "3" to frame 1 and destroy frame 2.
-
-    in frame 1: we've received "3" from frame 2. we append 3 to L1. L1 is now [+, 2, 3]. as a reminder, tokens is ") 3 )". since tokens[0] is ")", we break out of while loop WL1 in frame 1. we pop out the ")" from tokens. tokens is now "3 )". we return L1, which is [+, 2, 3], to frame 0. frame 1 is destroyed.
-
-    in frame 0: L0 was [*]. we've received L1 from frame 1 and append to L0.  L0 is now [*, [+, 2, 3]]. as a reminder, tokens is "3 )". tokens[0] is not ")" and therefore we continue the while loop WH0. we call read_from_tokens on tokens, which creates frame 1. frame 1's result will be appended to L0.
-
-    in frame 1: we pop out "3" from tokens. tokens is now ")". since it is an atom, we return "3" to frame 0 and destroy frame 1.
-
-    in frame 0: we've received "3" from frame 1. we append "3" to L0, which is now [*, [+, 2, 3], 3]. tokens is now ")". tokens[0] is ")", so we break out of the while loop WH0. we pop ")" from tokens. tokens is now empty and return L1, which is [*, [+, 2, 3], 3], to the calling function (eg parser). 
+    for example, a list of tokens eg (* ( + 2 3 ) 3) is parsed to a list of 
+    strings [*, [+, 2, 3], 3], which is also known as an ast.
     """
 
     # scenario 1: nothing inputted
@@ -192,23 +166,28 @@ class Procedure(object):
 def eval(x, env=global_env):
     """Evaluate an expression in an environment.
 
-    evaluation happens inside an environment, because it's the environment
-    that provides namespace management, eg variables, pacakge methods, etc.
+    evaluation happens inside an environment, because it's the environment that 
+    provides namespace management, eg variables, pacakge methods, etc.
 
-    As well as the input to execute, interpret() receives an execution 
-    context. This is the place where variables and their values are stored. 
-    When a piece of Lisp code is executed by interpret(), the execution context contains the variables that are accessible to that code.
+    As well as the input to execute, interpret() receives an execution context. 
+    This is the place where variables and their values are stored. When a piece 
+    of Lisp code is executed by interpret(), the execution context contains the 
+    variables that are accessible to that code.
 
-    x is the list created by the parser. for example, it might look like this: ['*', ['+', 2, 3], 3].
+    x is the ast created by the parser. for example, it might look like this: 
+    [*, [+, 2, 3], 3].
 
+    the simplest example is the ast [*, 2, 3]. the variable proc is bound to the
+    multiply operation. 2 and 3 are constant literals, and are combined into a 
+    single list [2, 3]. then proc(*args) is evaluated, which is the equivalent
+    of evaluating multiply([2, 3]).
     """
-    print("what am i", x, type(x))
     
-    # if it's a symbol aka string, find it's corresponding object/function the environment's dict.
+    # if it's a symbol aka string, find it's corresponding function from env
     if isinstance(x, Symbol):      # variable reference
         return env.find(x)[x]
     
-    elif not isinstance(x, List):  # constant literal
+    elif not isinstance(x, List):  # constant literal eg numbers
         return x                
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
@@ -217,8 +196,11 @@ def eval(x, env=global_env):
         (_, test, conseq, alt) = x
         exp = (conseq if eval(test, env) else alt)
         return eval(exp, env)
+    
+    # this expression ultimately binds the variable name var to a value. 
+    # this key value pair resides in the environment.
     elif x[0] == 'define':         # (define var exp)
-        (_, var, exp) = x
+        (_, var, exp) = x  # unpack elements into var and expression
         env[var] = eval(exp, env)
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
@@ -231,21 +213,28 @@ def eval(x, env=global_env):
     else:
 
         """
-        this is an overloaded function name. do not confuse this with the standard eval() method. 
+        do not confuse this eval() with the standard eval() method. 
 
-        the 0th element in a list is always an operation. for example, the parser gives us this expression ['*', ['+', 2, 3], 3]. the 0th element is "*", which should be evaluated as an operation. we bind that operation to the variable name "proc".
+        the 0th element in a list is always an operation. for example, the 
+        parser gives us the following ast [*, [+, 2, 3], 3]. the 0th element * 
+        is an operator and is bound to the variable name "proc".
 
-        the dict in eval(arg1, dict) limits what types of expressions can be evaluated by eval. https://www.programiz.com/python-programming/methods/built-in/eval
+        the dict in eval(arg1, dict) limits what types of expressions can be 
+        evaluated by eval. 
+        https://www.programiz.com/python-programming/methods/built-in/eval
         """
         proc = eval(x[0], env)
 
         """
-        each list in lisp is formed by [operator arg1 arg2]. we know x[0] refers to the operator so that means x[1:] refers to arguments. we will extract arguments.
+        each list has the format [operator arg1 arg2]. x[0] refers to the 
+        operator and x[1:] refers to arguments. we will extract arguments into a
+        single python list (not to be confused with a lisp list.)
         """
         args = [eval(exp, env) for exp in x[1:]]
 
         """
-        finally, we pass arguments to the operator, which is a function bound to the variable "proc"
+        finally, we pass args (a single python list containing arguments) to 
+        proc, which is the operator.
         """
         return proc(*args)
 

@@ -93,3 +93,15 @@ frame 2: `eval(3)`. `3` is a constant literal so frame 2 returns `3` to frame 1.
 frame 1: frame 1 receives `3` from frame 2, and appends it to frame 1's `arg`, which is now `[5, 3]`. 
 
 frame 1: we want to do `proc([5, 3])`. frame 1's `proc` is bound to a multiply operation. `multiply([5, 3])` returns `15` to frame 0.
+
+## `define`: an execution trace
+lets examine what happens to `(define r 10)`.
+
+the parser returns the ast `['define', 'r', 10]`. it is evaluated by the following code block:
+```python
+elif x[0] == 'define':
+	(_, var, exp) = x
+	env[var] = eval(exp, env)
+```
+the 0th element of the ast `x` - which is `['define', 'r', 10]` - is  `define` and the code block is executed. `x` is unpacked such that `var` is bound to the string `r` and `exp` is bound to the value `10`. since 10 is a constant literal, `eval(10)` returns the value `10`. `env` is the environment, represented as a python dictionary, and is updated such that `env[var] = 10`. 
+
