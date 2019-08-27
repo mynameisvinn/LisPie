@@ -192,16 +192,18 @@ def eval(x, env=global_env):
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
         return exp
+
+    # Evaluate test; if true, evaluate and return conseq; otherwise alt. 
     elif x[0] == 'if':             # (if test conseq alt)
         (_, test, conseq, alt) = x
         exp = (conseq if eval(test, env) else alt)
         return eval(exp, env)
     
-    # update env's dict, where var: exp is the key:value pair
+    # scenario: update env's dict, where var: exp is the key:value pair
     elif x[0] == 'define':         # (define var exp)
         (_, var, exp) = x
         env[var] = eval(exp, env)
-        
+
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
         env.find(var)[var] = eval(exp, env)
@@ -209,7 +211,7 @@ def eval(x, env=global_env):
         (_, parms, body) = x
         return Procedure(parms, body, env)
     
-    # scenario: x is not a symbol and it is a list; x[0] is a operator
+    # scenario: list of atoms where x[0] is a operator and x[1:] are arguments
     else:
 
         """
