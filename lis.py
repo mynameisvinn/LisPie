@@ -21,7 +21,8 @@ def parse(program):
     a program as input, call tokenize to get a list of tokens, and then call 
     read_from_tokens to assemble an abstract syntax tree.
     """
-    return read_from_tokens(tokenize(program))
+    tokens = tokenize(program)
+    return read_from_tokens(tokens)
 
 def tokenize(s):
     """Convert a string into a list of tokens.
@@ -32,7 +33,8 @@ def read_from_tokens(tokens):
     """Read an expression from a sequence of tokens.
 
     for example, a list of tokens eg (* ( + 2 3 ) 3) is parsed to a list of 
-    strings [*, [+, 2, 3], 3], which is also known as an ast.
+    strings [*, [+, 2, 3], 3], which is also known as an ast. notice that 2 and
+    3 are python integers, not strings "2" and "3". 
     """
 
     # scenario 1: nothing inputted
@@ -157,9 +159,14 @@ def lispstr(exp):
 ################ Procedures
 
 class Procedure(object):
-    "A user-defined Scheme procedure."
     def __init__(self, parms, body, env):
-        self.parms, self.body, self.env = parms, body, env
+        """
+        we create an inner env namespace, which effectively works as a local 
+        variable scoping
+        """
+        self.parms = parms 
+        self.body = body
+        self.env = env
     def __call__(self, *args): 
         return eval(self.body, Env(self.parms, args, self.env))
 
@@ -194,7 +201,7 @@ def eval(x, env=global_env):
     
     elif not isinstance(x, List):  # constant literal eg numbers (not strings)
         return x
-                        
+
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
         return exp
@@ -210,14 +217,20 @@ def eval(x, env=global_env):
         (_, var, exp) = x
         env[var] = eval(exp, env)
 
+    # set! simply binds var, which exists in env, to a new value or method
     elif x[0] == 'set!':           # (set! var exp)
         (_, var, exp) = x
         env.find(var)[var] = eval(exp, env)
+
+    # parms refer to parameter variables
+    # body is a procedural list
+    # an example is (lambda (r) (* r r))
     elif x[0] == 'lambda':         # (lambda (var...) body)
         (_, parms, body) = x
         return Procedure(parms, body, env)
     
-    # scenario: list of atoms where x[0] is a operator and x[1:] are arguments
+    # scenario: procedure... list of atoms where x[0] is a operator and x[1:] 
+    # are arguments
     else:
 
         """

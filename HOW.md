@@ -2,7 +2,7 @@
 ## creating tokens
 tokenize() takes a string of lisp code, puts spaces around every parenthesis and splits on whitespace. for example, it takes something like ((lambda (x) x) "Lisp"), transforms it into ` ( ( lambda ( x ) x ) “Lisp” ) ` and transforms that into ['(', '(', 'lambda', '(', 'x', ')', 'x', ')', '"Lisp"', ')'].
 
-## parsing - an execution trace
+## `read_from_tokens` - an execution trace
 parsing converts an expression into something that can be sequentially evaluated. for example, the nested expression `(* (+ 2 3) 3)` is converted into `['*', ['+', 2, 3], 3]`.
 
 lets look at an execution trace.
@@ -34,7 +34,7 @@ in frame 1: we pop out `3` from `tokens`. `tokens` is now `)`. since it is an at
 in frame 0: we've received `3` from frame 1. we append `3` to `L0`, which is now `[*, [+, 2, 3], 3]`. `tokens` is now `)`. `tokens[0]` is `)`, so we break out of the while loop `WH0`. we pop `)` from `tokens`. `tokens` is now empty and return `L1`, which is `[*, [+, 2, 3], 3]`, to the calling function (eg parser). 
 """
 
-## evaluation - an execution trace
+## `eval`: an execution trace
 frame 0: `repl()` calls `eval()` on `x`, which points to `['*', ['+', 2, 3], 3]`. frame 1 is created.
 
 frame 1: `x` is a `list` so we call `eval()` on `x[0]`, which corresponds to `"*"` and bind that result to `proc` variable. the corresponding line is:
@@ -84,7 +84,7 @@ frame 1: frame 1 receives `3` from frame 2, and appends it to frame 1's `arg`, w
 
 frame 1: we want to do `proc([5, 3])`. frame 1's `proc` is bound to a multiply operation. `multiply([5, 3])` returns `15` to frame 0.
 
-## `definition` expression: an execution trace
+## `define` expression: an execution trace
 lets examine what happens to `(define r 10)`.
 
 the parser returns the ast `['define', 'r', 10]`. it is evaluated by the following code block:
