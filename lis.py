@@ -8,7 +8,7 @@ import operator as op
 
 ################ Types
 
-Symbol = str          # A Lisp Symbol is implemented as a Python str
+Symbol = str          # A Lisp Symbol is implemented as a Python str; think of a symbol as a python variable - it can point to a function or a value.
 List   = list         # A Lisp List is implemented as a Python list
 Number = (int, float) # A Lisp Number is implemented as a Python int or float
 
@@ -119,6 +119,8 @@ class Env(dict):
 
     environment needs to track namespaces, which assigns symbols to 
     their respective objects.
+
+    outer env doesnt seem necessary.
     """
     def __init__(self, parms=(), args=(), outer=None):
         self.update(zip(parms, args))  # update merger two python dicts together https://www.tutorialspoint.com/python/dictionary_update.htm
@@ -184,11 +186,15 @@ def eval(x, env=global_env):
     """
     
     # if it's a symbol aka string, find it's corresponding function from env
+    # think of a symbol as a python variable - it can point to a function or a value.
+    # A symbol is interpreted as a variable name; its value is the variable's value. 
+    # Example: r ⇒ 10 (assuming r was previously defined to be 10)
     if isinstance(x, Symbol):      # variable reference of strings (not numbers)
         return env.find(x)[x]
     
     elif not isinstance(x, List):  # constant literal eg numbers (not strings)
-        return x                
+        return x
+                        
     elif x[0] == 'quote':          # (quote exp)
         (_, exp) = x
         return exp

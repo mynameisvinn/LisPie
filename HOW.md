@@ -124,3 +124,11 @@ elif x[0] == 'if':
 	return eval(exp, env)
 ```
 we extract `test`, `conseq`, and `alt` from `x`. `test` is `['>', 10, 20]` and is evaluated as `op.gt(10, 20)`. in this case, `exp` is assigned to `alt`. finally `eval(alt)` which returns `alt` (in this case, this is equivalent to `eval(0))`, which returns `0`.) 
+
+## `quote` procedure: an execution trace
+if `x` is `(quote exp)`, then `x[0]` satisfies the conditional and we execute the following code block:
+```python
+elif x[0] == 'quote':
+	(_, exp) = x  # x is of the form (quote exp)
+	return exp
+```
