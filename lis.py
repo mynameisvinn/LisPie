@@ -126,7 +126,7 @@ class Env(dict):
     """
     def __init__(self, parms=(), args=(), outer=None):
         self.update(zip(parms, args))  # update merger two python dicts together https://www.tutorialspoint.com/python/dictionary_update.htm
-        self.outer = outer
+        self.outer = outer  # outer refers to global environment or namespace
 
     def find(self, var):
         """Find the innermost Env where var appears.
@@ -168,6 +168,8 @@ class Procedure(object):
         self.body = body
         self.env = env
     def __call__(self, *args): 
+        print("parms", self.parms)
+        print("args", args)
         return eval(self.body, Env(self.parms, args, self.env))
 
 ################ eval
