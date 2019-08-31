@@ -1,13 +1,15 @@
 # parsing
 ## creating tokens
-tokenize() takes a string of lisp code, puts spaces around every parenthesis and splits on whitespace. for example, it takes something like ((lambda (x) x) "Lisp"), transforms it into ` ( ( lambda ( x ) x ) “Lisp” ) ` and transforms that into ['(', '(', 'lambda', '(', 'x', ')', 'x', ')', '"Lisp"', ')'].
+`tokenize()` takes lisp code, puts spaces around every parenthesis and splits on whitespace. 
+
+for example, it transforms `((lambda (x) x) "Lisp")` into ` ( ( lambda ( x ) x ) “Lisp” ) `, and then into ['(', '(', 'lambda', '(', 'x', ')', 'x', ')', '"Lisp"', ')'].
 
 ## `read_from_tokens` - an execution trace
-parsing converts an expression into something that can be sequentially evaluated. for example, the nested expression `(* (+ 2 3) 3)` is converted into `['*', ['+', 2, 3], 3]`.
+parsing converts expression into an ast that can be sequentially evaluated while preserving the correct order of operations. for example, the nested expression `(* (+ 2 3) 3)` is converted into `['*', ['+', 2, 3], 3]`.
 
 lets look at an execution trace.
 
-in frame 0: `tokens` is `(* ( + 2 3 ) 3)`. we encounter `(`, so we create a new list `L0` in frame 0. `tokens` is `* ( + 2 3 ) 3)` because `(` was popped. we enter into the while loop `WL0`. since we do not encounter `(` in `tokens[0]`, we call `read_from_tokens` on `tokens`, which creates frame 1. we will append the result of frame 1 and append it to list `L0`.
+in frame 0: `tokens` is `(* ( + 2 3 ) 3)`. we encounter `(` so we create a new list `L0` in frame 0. `tokens` is `* ( + 2 3 ) 3)` because `(` was popped. we enter into the while loop `WL0`. since we do not encounter `(` in `tokens[0]`, we call `read_from_tokens` on `tokens`, which creates frame 1. we will append the result of frame 1 to list `L0`.
 
 in frame 1: the 0th element `*` is popped from `tokens` and, since it is an atom, `*` is returned to frame 0. `tokens` is now `( + 2 3 ) 3)`. frame 1 is destroyed. 
 

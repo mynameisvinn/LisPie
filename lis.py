@@ -60,6 +60,11 @@ def read_from_tokens(tokens):
 
 def atom(token):
     """Numbers become numbers; every other token is a symbol.
+
+    an atom is either a number or symbol. they are atoms because they cannot be
+    broken down into simpler pieces.
+
+    everything in lisp is either an atom or a list expression. 
     """
     try: 
         return int(token)
@@ -119,10 +124,8 @@ def standard_env():
 class Env(dict):
     """An environment: a dict of {'var':val} pairs, with an outer Env.
 
-    environment needs to track namespaces, which assigns symbols to 
-    their respective objects.
-
-    outer env doesnt seem necessary.
+    an environment tracks namespaces, which assigns symbols to their respective 
+    objects and values. interpreters use environments to keep track of state.
     """
     def __init__(self, parms=(), args=(), outer=None):
         self.update(zip(parms, args))  # update merger two python dicts together https://www.tutorialspoint.com/python/dictionary_update.htm
@@ -176,6 +179,13 @@ class Procedure(object):
 
 def eval(x, env=global_env):
     """Evaluate an expression in an environment.
+
+	everything in lisp is either an atom (number or symbol) or a list expression.
+	list expressions are evaluated in one of two ways, depending on the first
+	element in the list. if the first element is a function (not a reserved
+	keyword), then it is evaluated. otherwise, if it is a reserved keyword (eg
+	define, lambda, etc.) then it is a special form, and therefore evaluated
+	in a unique way.
 
     evaluation happens inside an environment, because it's the environment that 
     provides namespace management, eg variables, pacakge methods, etc.
