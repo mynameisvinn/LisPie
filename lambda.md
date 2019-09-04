@@ -37,7 +37,7 @@ class Procedure(object):
         return eval(self.body, Env(self.parms, args, self.env))
 ```
 a few comments:
-* a `Procedure` is instantiated with the global environment. that means a procedure (aka function or method) has access to the global namespace, but not the other way around.
+* a `Procedure` is instantiated with the environment of the calling thread. that means a procedure (aka function or method) has access to the global namespace, but not the other way around. (this might be how closures, where a function is defined inside another function, works: the inner function inherits the scope of the outer function.)
 * the special method `__call__` allows us to call `Procedure` as if it is a function, even though it is implemented as an object.
 
 ### returning to frame 1 with a `Procedure` object, and binding it to `circle-area`
