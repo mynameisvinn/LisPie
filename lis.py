@@ -78,6 +78,15 @@ def atom(token):
 
 def standard_env():
     """An environment with some Scheme standard procedures.
+
+    a python interpreter has an environment too. this global environment is 
+    maintained as a python dict too, and tracks key value pairs like variables,
+    imported modules, paths, etc. in fact, you can retreive the dict with 
+    globals(). this global environment has a name too, usually something like
+    {'__name__':'__main__'}.
+
+
+    https://stackoverflow.com/questions/633127/viewing-all-defined-variables
     """
     
     # first, we'll create an env, then we'll update its namespace
