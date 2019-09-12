@@ -1,12 +1,24 @@
-# environment
-an interpreter manipulates data through code (which is just data that happens to be interpreted as instructions [0]) with the help of an environment.
+# what is `env`?
+an interpreter manipulates data through code - which is data that happens to be interpreted as instructions - with the help of an environment [0].
 
-the `env` is a scratchpad for an interpreter: it tells an interpreter what is assigned to what or the values of variables at that moment. every object thats available to an interpreter is tracked through the environment.
+an environment is a scratchpad for an interpreter: it tells an interpreter what is assigned to what or the values of variables at that moment. every object, value, variable thats available to an interpreter is tracked by the environment.
 
-## what happens when we do `python lispy.py`?
-when an interpreter creates a global `env` when it launches. (in python, you can see variables and other metadata in the global environment with `global()`.)
+## doing `python lispy.py` launches the environment
+an interpreter creates a global `env` when it launches [1].
+```python
+global_env = standard_env()  # helper function to instantiate Env and populate it with primitives
+...
+def standard_env():
+    env = Env()
+    env.update(vars(math))
+    env.update({
+        '+': op.add, 
+        '-': op.sub      
+    })
+    return env
+```
 
-## how is the environment `env` implemented?
+## how is `Env` implemented?
 a lisp environment is implemented by a python dict. (cpython's env is also implemented with a python dict.)
 
 ```python
@@ -51,5 +63,6 @@ def find(self, var):
 ```
 it returns the local `Env` if the symbol exists in the local `Env`'s dict. if it doesnt, it searches for the symbol in `self.outer`, the global/outer `Env`. (this sequential ordering is why functions/procedures/methods search inner scopes first.)
 
-
+---
 [0] "say your name" versus "say 'your name'" is evaluated differently by a human.
+[1] in python, you can see variables and other metadata in the global environment with `global()`.
