@@ -1,18 +1,18 @@
 # what happens when we use `define`?
-## `define` inserts a new key:value pair in the namespace
+## `define` inserts a new key:value/symbol:value pair in the environment
 lets examine what happens to `(define r 10)`.
 
-the parser returns the ast `['define', 'r', 10]`. it is evaluated by the following code block:
+the ast `['define', 'r', 10]` triggers the following block. (notice that `10` is a python integer, not a string. this conversion is handled by the `atom` function.)
 ```python
 elif x[0] == 'define':
 	(_, var, exp) = x
 	env[var] = eval(exp, env)
 ```
-the 0th element of the ast `x` - which is `['define', 'r', 10]` - is  `define` and the code block is executed. (notice that `10` is a python integer, not a string. this conversion is handled by the `atom` function.)
+`x` is unpacked: `var` is bound to `r` and `exp` is bound to `10`. 
 
-`x` is unpacked such that `var` is bound to the string `r` and `exp` is bound to the value `10`. since 10 is a constant literal, `eval(10)` returns the value `10`. `env` is the environment, represented as a python dictionary, and is updated such that `env[var] = 10`. 
+`eval(10)` returns the value `10` since 10 is a constant literal. finally, a new symbol is created in the current environment (either inner or outer) and then paired with the value 10.
 
-## how do we reference symbols, following `define`?
+## how do we reference symbols, after it's been defined?
 we previously defined `r`. what happens if we evaluate `(* r r)`?. 
 
 this expression is a regular list expression (as opposed to a special form) and therefore flows through the `else` block:
