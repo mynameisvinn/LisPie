@@ -1,7 +1,9 @@
 # what is `env`?
-an interpreter manipulates data through code - which is data that happens to be interpreted as instructions - with the help of an environment.[0]
+an interpreter manipulates data through code - data interpreted as instructions - with the help of an environment.[0]
 
-an environment is a scratchpad for an interpreter: it tells an interpreter what is assigned to what or the values of variables at that moment.
+an environment is a working scratchpad for an interpreter: it tells an interpreter what is assigned to what or the values of variables at that moment. 
+
+moreover, the environment structure is based on call stacks: the main call stack manipulates the global environment, and each subsequent stack frame manipulates a local environment. (in [python](http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/), you can inspect the global env with `global()` and local envs with `print(local())`.) local envs are destroyed when a function exits - that is, when the interpreter call stack is deestroyed.
 
 ## doing `python lispy.py` launches the environment
 an interpreter creates a global `env` when it launches.[1]
@@ -67,7 +69,7 @@ class Env(dict):
 it returns the local `Env` if the symbol exists in the local `Env`'s dict. if it doesnt, it searches for the symbol in `self.outer`, the global/outer `Env`.
 
 ### scoping priorities
-`find()`'s implementation means inner environments are searched first, then outer/global namepsaces. a consequence of this arrangement is that, when executing a function, an interpreter has access to both the function's local variables and global variables; however, the converse is not true, as a global function does not have access to local namespaces.
+`find()`'s implementation means inner environments are searched first, then outer/global namepsaces. ([python's scope rule](http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/) dictates variable access starts with local scope, then searches all of the enclosing scopes.) a consequence of this arrangement is that, when executing a function, an interpreter has access to both the function's local variables and global variables; however, the converse is not true, as a global function does not have access to local namespaces.
 
 ---
 [0] "say your name" versus "say 'your name'" is evaluated differently by a human.
